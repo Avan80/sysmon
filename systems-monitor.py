@@ -1,5 +1,8 @@
 import psutil
 import json
+import os
+
+os.makedirs("/var/log/sysmon", exist_ok=True)
 
 cpu_percent = psutil.cpu_percent(interval=1)
 cpu_threads = psutil.cpu_count()
@@ -35,4 +38,5 @@ metrics = {
     }
 }
 
-print(json.dumps(metrics, indent=2))
+with open("/var/log/sysmon/metrics.log", "a") as file:
+    file.write(json.dumps(metrics) + "\n")
