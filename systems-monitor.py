@@ -13,7 +13,7 @@ while True:
     load_average = psutil.getloadavg()
     free_mem = psutil.virtual_memory().percent
     available_mem = psutil.virtual_memory().available
-    swap_mem = psutil.virtual_memory().swap
+    swap_mem = psutil.swap_memory().percent
     io_stats = psutil.net_io_counters()
     tcp_connections = len(psutil.net_connections(kind='tcp'))
     udp_connections = len(psutil.net_connections(kind='udp'))
@@ -31,11 +31,13 @@ while True:
             "CPU usage percentage": cpu_percent,
             "CPU threads": cpu_threads,
             "Load average": load_average,
-            "CPU frequency": cpu_frequency,
-            "CPU times": cpu_times,
+            "CPU frequency": cpu_frequency.current,
+            "CPU user time": cpu_times.user,
+            "CPU system time": cpu_times.system,
+            "CPU idle time": cpu_times.idle,
         },
         "Memory": {
-            "Free": free_mem,
+            "Used": free_mem,
             "Available": round(available_mem / 1024**3, 2),
             "Swap": round(swap_mem / 1024**3, 2),
         },
