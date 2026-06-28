@@ -13,7 +13,7 @@ logging.basicConfig(
     format="%(asctime)s %(levelname)s %(message)s"
 )
 
-while True:
+def metrics():
     cpu_percent = psutil.cpu_percent(interval=1)
     cpu_threads = psutil.cpu_count()
     cpu_frequency = psutil.cpu_freq()
@@ -35,7 +35,7 @@ while True:
         except PermissionError:
             logging.warning(f"permission denied: {partition.mountpoint}")
 
-    metrics = {
+    return {
         "Time": datetime.now(timezone.utc).isoformat(),
         "CPU": {
             "CPU usage percentage": cpu_percent,
@@ -63,19 +63,25 @@ while True:
             "Network drops": net_drops_in, 
         }
     }
-    with open("/var/log/sysmon/metrics.log", "a") as file:
-        file.write(json.dumps(metrics) + "\n")
-    if cpu_percent > 80:
-        logging.warning(f"CPU usage high: {cpu_percent}%")
-    if free_mem > 90:
-        logging.warning(f"Memory usage high: {free_mem}%")
-    if swap_mem > 35:
-        logging.warning(f"Memory constrained, swap usage high: {swap_mem}%")
-    for mountpoint, percent in disk.items():
-        if percent > 80:
-            logging.warning(f"Disk usage high on {mountpoint}: {percent}%") 
-    if net_errors_in > 0:
-        logging.warning(f"Network errors incoming: {net_errors_in}")
-    if net_drops_in > 0:
-        logging.warning(f"Network drops incoming: {net_drops_in}")
-    time.sleep(30)
+def run():
+    while True:
+        metric = metrics()
+        with open("/var/log/sysmon/metrics.log", "a") as file:
+            file.write(json.dumps(metric) + "\n")
+        if metric["CPU"]["CPU usage percentage"] > 80:
+            logging.warning(f"CPU usage high: {metric['CPU']['CPU usage percentage']}%")
+        if metric["Memory"]["Used"] > 90:
+            logging.warning(f"Memory usage high: {metric['Memory']['Used']}%")
+        if metric["Memory"]["Swap"] > 35:
+            logging.warning(f"Memory constrained, swap usage high: {metric['Memory']['Swap']}%")
+        for mountpoint, percent in metric["Disk"].items():
+            if percent > 80:
+                logging.warning(f"Disk usage high on {mountpoint}: {percent}%") 
+        if metric["Network"]["Network errors"] > 0:
+            logging.warning(f"Network errors incoming: {metric['Network']['Network errors']}")
+        if metric["Network"]["Network drops"] > 0:
+            logging.warning(f"Network drops incoming: {metric['Network']['Network drops']}")
+        time.sleep(30)
+
+if __name__ == "__main__":
+    run()
