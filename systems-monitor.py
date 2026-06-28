@@ -3,8 +3,16 @@ import json
 import os
 import time
 from datetime import datetime, timezone
+import logging
 
 os.makedirs("/var/log/sysmon", exist_ok=True)
+
+logging.basicConfig(
+    filename="/var/log/sysmon/sysmon.log",
+    level=logging.WARNING,
+    format="%(asctime)s %(levelname)s %(message)s"
+)
+
 while True:
     cpu_percent = psutil.cpu_percent(interval=1)
     cpu_threads = psutil.cpu_count()
@@ -17,13 +25,15 @@ while True:
     io_stats = psutil.net_io_counters()
     tcp_connections = len(psutil.net_connections(kind='tcp'))
     udp_connections = len(psutil.net_connections(kind='udp'))
+    net_errors_in = io_stats.errin
+    net_drops_in = io_stats.dropin
     disk = {}
     for partition in psutil.disk_partitions():
         try:
             usage = psutil.disk_usage(partition.mountpoint)
             disk[partition.mountpoint] = usage.percent
         except PermissionError:
-            pass
+            logging.warning(f"permission denied: {partition.mountpoint}")
 
     metrics = {
         "Time": datetime.now(timezone.utc).isoformat(),
@@ -49,9 +59,23 @@ while True:
             "Packets received": io_stats.packets_recv,
             "TCP connection count": tcp_connections,
             "UDP connection count": udp_connections,
+            "Network errors": net_errors_in,
+            "Network drops": net_drops_in, 
         }
     }
-
     with open("/var/log/sysmon/metrics.log", "a") as file:
         file.write(json.dumps(metrics) + "\n")
+    if cpu_percent > 80:
+        logging.warning(f"CPU usage high: {cpu_percent}%")
+    if free_mem > 90:
+        logging.warning(f"Memory usage high: {free_mem}%")
+    if swap_mem > 35:
+        logging.warning(f"Memory constrained, swap usage high: {swap_mem}%")
+    for mountpoint, percent in disk.items():
+        if percent > 80:
+            logging.warning(f"Disk usage high on {mountpoint}: {percent}%") 
+    if net_errors_in > 0:
+        logging.warning(f"Network errors incoming: {net_errors_in}")
+    if net_drops_in > 0:
+        logging.warning(f"Network drops incoming: {net_drops_in}")
     time.sleep(30)
