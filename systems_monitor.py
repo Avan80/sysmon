@@ -5,8 +5,6 @@ import time
 from datetime import datetime, timezone
 import logging
 
-os.makedirs("/var/log/sysmon", exist_ok=True)
-
 logging.basicConfig(
     filename="/var/log/sysmon/sysmon.log",
     level=logging.WARNING,
@@ -64,6 +62,12 @@ def metrics():
         }
     }
 def run():
+    os.makedirs("/var/log/sysmon", exist_ok=True)
+    logging.basicConfig(
+        filename="/var/log/sysmon/sysmon.log",
+        level=logging.WARNING,
+        format="%(asctime)s %(levelname)s %(message)s"
+    )
     while True:
         metric = metrics()
         with open("/var/log/sysmon/metrics.log", "a") as file:
