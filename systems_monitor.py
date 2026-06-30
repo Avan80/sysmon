@@ -61,13 +61,13 @@ def metrics():
 def run():
     os.makedirs("LOG_DIR, exist_ok=True)
     logging.basicConfig(
-        filename="f{LOG_DIR}/sysmon.log",
+        filename=f"{LOG_DIR}/sysmon.log",
         level=logging.WARNING,
         format="%(asctime)s %(levelname)s %(message)s"
     )
     while True:
         metric = metrics()
-        with open("{LOG_DIR}/metrics.log", "a") as file:
+        with open(f"{LOG_DIR}/metrics.log", "a") as file:
             file.write(json.dumps(metric) + "\n")
         if metric["CPU"]["CPU usage percentage"] > 80:
             logging.warning(f"CPU usage high: {metric['CPU']['CPU usage percentage']}%")
