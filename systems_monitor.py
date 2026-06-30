@@ -5,12 +5,6 @@ import time
 from datetime import datetime, timezone
 import logging
 
-logging.basicConfig(
-    filename="/var/log/sysmon/sysmon.log",
-    level=logging.WARNING,
-    format="%(asctime)s %(levelname)s %(message)s"
-)
-
 def metrics():
     cpu_percent = psutil.cpu_percent(interval=1)
     cpu_threads = psutil.cpu_count()
