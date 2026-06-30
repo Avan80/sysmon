@@ -59,7 +59,7 @@ def metrics():
         }
     }
 def run():
-    os.makedirs("LOG_DIR, exist_ok=True)
+    os.makedirs(LOG_DIR, exist_ok=True)
     logging.basicConfig(
         filename=f"{LOG_DIR}/sysmon.log",
         level=logging.WARNING,
