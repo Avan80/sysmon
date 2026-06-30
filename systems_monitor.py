@@ -5,6 +5,9 @@ import time
 from datetime import datetime, timezone
 import logging
 
+LOG_DIR = os.environ.get("SYSMON_LOG_DIR", "/var/log/sysmon")
+BUCKET = os.environ.get("SYSMON_BUCKET")
+
 def metrics():
     cpu_percent = psutil.cpu_percent(interval=1)
     cpu_threads = psutil.cpu_count()
@@ -56,15 +59,15 @@ def metrics():
         }
     }
 def run():
-    os.makedirs("/var/log/sysmon", exist_ok=True)
+    os.makedirs("LOG_DIR, exist_ok=True)
     logging.basicConfig(
-        filename="/var/log/sysmon/sysmon.log",
+        filename="f{LOG_DIR}/sysmon.log",
         level=logging.WARNING,
         format="%(asctime)s %(levelname)s %(message)s"
     )
     while True:
         metric = metrics()
-        with open("/var/log/sysmon/metrics.log", "a") as file:
+        with open("{LOG_DIR}/metrics.log", "a") as file:
             file.write(json.dumps(metric) + "\n")
         if metric["CPU"]["CPU usage percentage"] > 80:
             logging.warning(f"CPU usage high: {metric['CPU']['CPU usage percentage']}%")
