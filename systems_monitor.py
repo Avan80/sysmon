@@ -58,6 +58,22 @@ def metrics():
             "Network drops": net_drops_in, 
         }
     }
+
+def check_thresholds(metric):        
+    if metric["CPU"]["CPU usage percentage"] > 80:
+        logging.warning(f"CPU usage high: {metric['CPU']['CPU usage percentage']}%")
+    if metric["Memory"]["Used"] > 90:
+        logging.warning(f"Memory usage high: {metric['Memory']['Used']}%")
+    if metric["Memory"]["Swap"] > 35:
+        logging.warning(f"Memory constrained, swap usage high: {metric['Memory']['Swap']}%")
+    for mountpoint, percent in metric["Disk"].items():
+        if percent > 80:
+            logging.warning(f"Disk usage high on {mountpoint}: {percent}%") 
+    if metric["Network"]["Network errors"] > 0:
+        logging.warning(f"Network errors incoming: {metric['Network']['Network errors']}")
+    if metric["Network"]["Network drops"] > 0:
+        logging.warning(f"Network drops incoming: {metric['Network']['Network drops']}")
+
 def run():
     os.makedirs(LOG_DIR, exist_ok=True)
     logging.basicConfig(
@@ -68,21 +84,9 @@ def run():
     while True:
         metric = metrics()
         with open(f"{LOG_DIR}/metrics.log", "a") as file:
-            file.write(json.dumps(metric) + "\n")
-        if metric["CPU"]["CPU usage percentage"] > 80:
-            logging.warning(f"CPU usage high: {metric['CPU']['CPU usage percentage']}%")
-        if metric["Memory"]["Used"] > 90:
-            logging.warning(f"Memory usage high: {metric['Memory']['Used']}%")
-        if metric["Memory"]["Swap"] > 35:
-            logging.warning(f"Memory constrained, swap usage high: {metric['Memory']['Swap']}%")
-        for mountpoint, percent in metric["Disk"].items():
-            if percent > 80:
-                logging.warning(f"Disk usage high on {mountpoint}: {percent}%") 
-        if metric["Network"]["Network errors"] > 0:
-            logging.warning(f"Network errors incoming: {metric['Network']['Network errors']}")
-        if metric["Network"]["Network drops"] > 0:
-            logging.warning(f"Network drops incoming: {metric['Network']['Network drops']}")
-        time.sleep(30)
+            file.write(json.dumps(metric) + "\n")       
+    check_thresholds(metric)
+    time.sleep(30)
 
 if __name__ == "__main__":
     run()
