@@ -6,7 +6,7 @@ from datetime import datetime, timezone
 import logging
 
 LOG_DIR = os.environ.get("SYSMON_LOG_DIR", "/var/log/sysmon")
-BUCKET = os.environ.get("SYSMON_BUCKET")
+BUCKET = os.environ.get("SYSMON_BUCKET") # to be removed in a later CD test
 
 def metrics():
     cpu_percent = psutil.cpu_percent(interval=1)
@@ -61,7 +61,7 @@ def metrics():
 def run():
     os.makedirs(LOG_DIR, exist_ok=True)
     logging.basicConfig(
-        filename=f"{LOG_DIR}/sysmon.log",
+        filename=f"{LOG_DIR}/warn.log",
         level=logging.WARNING,
         format="%(asctime)s %(levelname)s %(message)s"
     )
