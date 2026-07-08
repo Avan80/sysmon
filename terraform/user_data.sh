@@ -1,19 +1,19 @@
-
+#!/bin/bash
 set -euo pipefail
 
 apt-get update
-apt-get install -y python3 python-pip git
+apt-get install -y python3 python3-pip git
 
-useradd --system --no-create-home --shell  /usr/sbin/nologin sysmon || true 
+useradd --system --no-create-home --shell /usr/sbin/nologin sysmon || true 
 
 mkdir -p /var/log/sysmon
 chown sysmon:sysmon /var/log/sysmon
 
-git clone https://github.com/Avan80/sysmon.git/opt /sysmon-repo
-cp /opt/sysmon-repo/systems_monitor.py /opt/sysmon/systems_monitor.py 2>/dev/null || {
-  mkdir -p /opt/sysmon
-  cp /opt/sysmon-repo/systems_monitor.py /opt/sysmon/systems_monitor.py
-}
+git clone https://github.com/Avan80/sysmon.git /opt/sysmon-repo
+
+mkdir -p /opt/sysmon
+cp /opt/sysmon-repo/systems_monitor.py /opt/sysmon/systems_monitor.py
+
 
 chown root:root /opt/sysmon/systems_monitor.py
 chmod 644 /opt/sysmon/systems_monitor.py
