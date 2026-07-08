@@ -1,5 +1,6 @@
 [Unit]
 Description=Systems monitor - script that collects hosts systems metrics and logs exceeded thresholds
+After=network.target
 
 [Service]
 Type=simple

@@ -7,6 +7,7 @@ terraform {
   }
 }
 
+
 provider "aws" {
   region  = "us-east-1"
   profile = "sysmon-test"
@@ -92,7 +93,7 @@ resource "aws_security_group" "sysmon_sg" {
 resource "aws_instance" "sysmon_instance" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.micro"
-  key_name               = "sysmon-test"
+  key_name               = "bigfoor-hardened-key"
   vpc_security_group_ids = [aws_security_group.sysmon_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.sysmon_profile.name
 
