@@ -1,1 +1,5 @@
 pytes
+terraform/.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
