@@ -1,0 +1,23 @@
+{
+    "agent": {
+      "run_as_user": "root"
+    },
+    "logs": {
+      "logs_collected": {
+        "files": {
+          "collect_list": [
+            {
+              "file_path": "/var/log/sysmon/metrics.log",
+              "log_group_name": "sysmon/metrics",
+                "log_stream_name": "{instance_id}-metrics"
+            },
+            {
+                "file_path": "/var/log/sysmon/warnings.log",
+                "log_group_name": "sysmon/metrics",
+                "log_stream_name": "{instance_id}-warnings"
+            }
+          ]
+        }
+      }
+    }
+}
