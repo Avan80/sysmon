@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 5.0"
     }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.0"
+    }
   }
 }
 
@@ -21,6 +25,14 @@ data "aws_ami" "ubuntu" {
     name   = "name"
     values = ["ubuntu/images/hvm-ssd-gp3/ubuntu-noble-24.04-amd64-server-*"]
   }
+}
+
+data "http" "my_ip" {
+  url = "https://checkip.amazonaws.com"
+}
+
+locals {
+  my_ip = trimspace(data.http.my_ip.response_body)
 }
 
 resource "aws_iam_role" "sysmon_iam_role" {
@@ -48,6 +60,7 @@ resource "aws_iam_role_policy" "sysmon_iam_role_policy" {
     Version = "2012-10-17"
     Statement = [
       {
+        Effect = "Allow"
         Action = [
           "logs:CreateLogGroup",
           "logs:CreateLogStream",
@@ -56,7 +69,8 @@ resource "aws_iam_role_policy" "sysmon_iam_role_policy" {
           "logs:DescribeLogGroups",
         ]
         Resource = "*"
-    }]
+      }
+    ]
   })
 }
 
@@ -70,6 +84,11 @@ resource "aws_iam_role_policy_attachment" "ssm_policy" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
 }
 
+resource "aws_iam_role_policy_attachment" "cloudwatch_agent_policy" {
+  role       = aws_iam_role.sysmon_iam_role.name
+  policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+}
+
 resource "aws_security_group" "sysmon_sg" {
   name = "sysmon-sg"
 
@@ -78,7 +97,7 @@ resource "aws_security_group" "sysmon_sg" {
     from_port   = 22
     to_port     = 22
     protocol    = "tcp"
-    cidr_blocks = ["102.184.54.251/32"]
+    cidr_blocks = ["${local.my_ip}/32"]
   }
 
   egress {
@@ -93,14 +112,21 @@ resource "aws_security_group" "sysmon_sg" {
 resource "aws_instance" "sysmon_instance" {
   ami                    = data.aws_ami.ubuntu.id
   instance_type          = "t3.micro"
-  key_name               = "bigfoor-hardened-key"
+  key_name               = "sysmon-key"
   vpc_security_group_ids = [aws_security_group.sysmon_sg.id]
   iam_instance_profile   = aws_iam_instance_profile.sysmon_profile.name
 
   user_data = file("user_data.sh")
+
+  
 
   tags = {
     Name = "sysmon-test"
     role = "sysmon"
   }
 }
+
+output "instance_public_ip" {
+  value = aws_instance.sysmon_instance.public_ip
+  }
+
