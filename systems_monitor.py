@@ -85,8 +85,8 @@ def run():
         metric = metrics()
         with open(f"{LOG_DIR}/metrics.log", "a") as file:
             file.write(json.dumps(metric) + "\n")       
-    check_thresholds(metric)
-    time.sleep(30)
+        check_thresholds(metric)
+        time.sleep(30)
 
 if __name__ == "__main__":
     run()
