@@ -19,9 +19,6 @@ chmod 644 /opt/sysmon/systems_monitor.py
 
 pip3 install psutil --break-system-packages
 
-echo "sysmon ALL=(root) NOPASSWD: /usr/bin/python3 /opt/sysmon/systems_monitor.py" > /etc/sudoers.d/sysmon
-chmod 440 /etc/sudoers.d/sysmon
-
 wget https://s3.amazonaws.com/amazoncloudwatch-agent/ubuntu/amd64/latest/amazon-cloudwatch-agent.deb
 dpkg -i -E ./amazon-cloudwatch-agent.deb
 
